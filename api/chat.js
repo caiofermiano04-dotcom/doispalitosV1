@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   try {
-    const response = await fetch("/api/chat"), {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -11,9 +11,11 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
+
     res.status(200).json(data);
 
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Erro ao conectar com Claude" });
   }
 }
