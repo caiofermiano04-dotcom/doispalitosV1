@@ -12,7 +12,12 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    res.status(200).json(data);
+    // extrai o texto corretamente
+    const reply = data.content?.[0]?.text || "Erro ao gerar resposta";
+
+    res.status(200).json({
+      content: [{ text: reply }]
+    });
 
   } catch (error) {
     console.error(error);
