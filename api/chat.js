@@ -1,17 +1,8 @@
 export default async function handler(req, res) {
+
   try {
 
-    const { messages, system, max_tokens, model } = req.body;
-
-    const formattedMessages = messages.map(m => ({
-      role: m.role,
-      content: [
-        {
-          type: "text",
-          text: m.content
-        }
-      ]
-    }));
+    const userMessage = req.body.messages?.slice(-1)[0]?.content || "";
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -21,23 +12,34 @@ export default async function handler(req, res) {
         "anthropic-version": "2023-06-01"
       },
       body: JSON.stringify({
-        model,
-        max_tokens,
-        system,
-        messages: formattedMessages
+        model: "claude-3-haiku-20240307",
+        max_tokens: 800,
+        messages: [
+          {
+            role: "user",
+            content: userMessage
+          }
+        ]
       })
     });
 
     const data = await response.json();
 
-    const reply = data?.content?.[0]?.text || "Erro ao gerar resposta";
+    const text = data?.content?.[0]?.text || "Não consegui gerar resposta.";
 
     res.status(200).json({
-      content: [{ text: reply }]
+      content: [
+        { text }
+      ]
     });
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Erro ao conectar com Claude" });
+    res.status(500).json({
+      content: [
+        { text: "Erro ao conectar com a IA." }
+      ]
+    });
   }
+
 }
